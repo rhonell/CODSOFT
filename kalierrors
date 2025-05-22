@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Fix missing GPG key error for Kali Linux APT repositories
+
+KEY_ID="ED65462EC8D5E4C5"
+KEY_URL="https://archive.kali.org/archive-key.asc"
+KEYRING_DIR="/etc/apt/keyrings"
+KEYRING_FILE="$KEYRING_DIR/kali.gpg"
+SOURCE_LIST="/etc/apt/sources.list"
+REPO_LINE="deb [signed-by=$KEYRING_FILE] http://http.kali.org/kali kali-rolling main contrib non-free non-free-firmware"
+
+echo "[*] Creating keyring directory if it doesn't exist..."
+sudo mkdir -p $KEYRING_DIR
+
+echo "[*] Downloading and saving GPG key..."
+curl -fsSL $KEY_URL | gpg --dearmor | sudo tee $KEYRING_FILE > /dev/null
+
+echo "[*] Checking sources.list for correct repo format..."
+if ! grep -Fxq "$REPO_LINE" $SOURCE_LIST; then
+    echo "[*] Updating sources.list with proper signed-by format..."
+    echo "$REPO_LINE" | sudo tee $SOURCE_LIST > /dev/null
+else
+    echo "[*] sources.list already contains the correct repo format."
+fi
+
+echo "[*] Updating APT repositories..."
+sudo apt update
+
+echo "[✔] Done. Repository key issue resolved if no errors appeared above."
